@@ -13,6 +13,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 
     <style>
+        /* Fluid Interactive Canvas Background */
+        #fluidCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.85;
+            display: none;
+            transition: opacity 0.5s ease;
+        }
+
+        [data-wallpaper="fluid"] #fluidCanvas {
+            display: block !important;
+        }
+
+        [data-wallpaper="fluid"] {
+            background-color: #050608 !important;
+            background-image: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08), transparent 70%) !important;
+        }
+
         /* ===== MODERN MINIMALIST OBSIDIAN & RAYCAST PALETTE ===== */
         :root {
             --desk-bg: #0a0a0c;
@@ -1423,6 +1446,9 @@
 </head>
 <body data-theme="dark" data-wallpaper="dots">
     <div class="desktop-container" id="desktop">
+        <!-- Fluid Interactive Background Canvas -->
+        <canvas id="fluidCanvas"></canvas>
+
 
         <!-- ===== TOP STATUS BAR ===== -->
         <header class="topbar">
@@ -1533,6 +1559,63 @@
                 </svg>
             </div>
             <span class="desktop-icon-label">Calendar</span>
+        </div>
+
+
+        <!-- PROJECT SHORTCUT ICONS -->
+        <div class="desktop-icon" id="icon-proj-yuni" data-action="project-modal" data-slug="yuni-counter-v2" title="Yuni Counter V2 (Taiwan)">
+            <div class="desktop-icon-art">
+                <span class="desktop-icon-badge">LIVE</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+            <span class="desktop-icon-label">yuni.app</span>
+        </div>
+
+        <div class="desktop-icon" id="icon-proj-pulse" data-action="project-modal" data-slug="pulse-telemetry" title="Pulse Telemetry (SSE)">
+            <div class="desktop-icon-art">
+                <span class="desktop-icon-badge">LIVE</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+            </div>
+            <span class="desktop-icon-label">pulse.app</span>
+        </div>
+
+        <div class="desktop-icon" id="icon-proj-kwitansi" data-action="project-modal" data-slug="kharisma-ac-kwitansi" title="Kharisma AC Kwitansi">
+            <div class="desktop-icon-art">
+                <span class="desktop-icon-badge">BIZ</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+            </div>
+            <span class="desktop-icon-label">kwitansi.app</span>
+        </div>
+
+        <div class="desktop-icon" id="icon-proj-hub" data-action="project-modal" data-slug="vanzodev-hub" title="VanzoDev Hub OS Gateway">
+            <div class="desktop-icon-art">
+                <span class="desktop-icon-badge">OS</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+            </div>
+            <span class="desktop-icon-label">hub.app</span>
+        </div>
+
+        <div class="desktop-icon" id="icon-proj-lab" data-action="project-modal" data-slug="lab-agent-pipeline" title="AI Agent Lab Pipeline">
+            <div class="desktop-icon-art">
+                <span class="desktop-icon-badge" style="background: #a855f7;">LAB</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
+                    <path d="M10 2v7.31L4.69 18.5a2 2 0 0 0 1.62 3.5h11.38a2 2 0 0 0 1.62-3.5L14 9.31V2"></path>
+                </svg>
+            </div>
+            <span class="desktop-icon-label">lab.app</span>
         </div>
 
         <div class="desktop-icon" id="icon-admin" data-target="adminWin" style="left: 120px; top: 54px;">
@@ -2091,7 +2174,7 @@
             playChime(520);
         }
 
-        const wallpapers = ['dots', 'grid', 'circuit', 'solid'];
+        const wallpapers = ['dots', 'grid', 'circuit', 'fluid', 'solid'];
         function cycleWallpaper() {
             const current = document.body.getAttribute('data-wallpaper') || 'dots';
             const nextIdx = (wallpapers.indexOf(current) + 1) % wallpapers.length;
@@ -2171,9 +2254,23 @@
             window.addEventListener('mouseup', onMouseUp);
         }
 
-        // Desktop Icons click
+        // Desktop Icons click (Clean Click vs Drag Distinction)
         document.querySelectorAll('.desktop-icon').forEach(icon => {
-            icon.addEventListener('click', () => {
+            icon.addEventListener('click', (e) => {
+                if (icon.dataset.dragged === 'true') {
+                    // Mencegah trigger action bila baru selesai di-drag
+                    icon.dataset.dragged = 'false';
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                const action = icon.getAttribute('data-action');
+                if (action === 'project-modal') {
+                    const slug = icon.getAttribute('data-slug');
+                    const proj = projectsData.find(p => p.slug === slug);
+                    if (proj) openProjectModal(proj.id);
+                    return;
+                }
                 const target = icon.getAttribute('data-target');
                 if (target) toggleWindow(target);
             });
@@ -2555,15 +2652,26 @@
             const leftColX = isNarrow ? 14 : 28;
             const rightColX = isNarrow ? Math.max(leftColX + 96, window.innerWidth - 100) : Math.max(leftColX + 100, window.innerWidth - 114);
 
+            const midColX = isNarrow ? Math.max(leftColX + 80, window.innerWidth - 180) : leftColX + 96;
             return {
+                // Kolom Kiri: Core Windows
                 'icon-projects': { x: leftColX, y: 52 },
                 'icon-terminal': { x: leftColX, y: 148 },
                 'icon-todos':    { x: leftColX, y: 244 },
                 'icon-skills':   { x: leftColX, y: 340 },
-                'icon-about':    { x: rightColX, y: 52 },
-                'icon-calendar': { x: rightColX, y: 148 },
-                'icon-contact':  { x: rightColX, y: 244 },
-                'icon-admin':    { x: rightColX, y: 340 }
+                'icon-about':    { x: leftColX, y: 436 },
+
+                // Kolom Tengah: Project Direct Shortcuts
+                'icon-proj-yuni':     { x: midColX, y: 52 },
+                'icon-proj-pulse':    { x: midColX, y: 148 },
+                'icon-proj-kwitansi': { x: midColX, y: 244 },
+                'icon-proj-hub':      { x: midColX, y: 340 },
+                'icon-proj-lab':      { x: midColX, y: 436 },
+
+                // Kolom Kanan: System & Utilities
+                'icon-calendar': { x: rightColX, y: 52 },
+                'icon-contact':  { x: rightColX, y: 148 },
+                'icon-admin':    { x: rightColX, y: 244 }
             };
         }
 
@@ -2664,6 +2772,9 @@
 
                     if (hasMoved) {
                         icon.classList.remove('is-dragging');
+                        icon.dataset.dragged = 'true';
+                        setTimeout(() => { icon.dataset.dragged = 'false'; }, 250);
+
                         let saved = {};
                         try {
                             saved = JSON.parse(localStorage.getItem(DESKTOP_ICON_STORAGE_KEY)) || {};
@@ -2673,6 +2784,8 @@
                             y: parseFloat(icon.style.top)
                         };
                         localStorage.setItem(DESKTOP_ICON_STORAGE_KEY, JSON.stringify(saved));
+                    } else {
+                        icon.dataset.dragged = 'false';
                     }
                 }
 
@@ -3181,10 +3294,133 @@
             checkAdminSession();
             renderCalendar();
             initDesktopIcons();
+            initFluidSystem();
             if (window.innerWidth > 768) {
                 setTimeout(() => toggleWindow('projectsWin'), 300);
             }
         });
+    
+        // ==========================================
+        // FLUID PARTICLE MOUSE INTERACTIVE ENGINE
+        // ==========================================
+        const fluidCanvas = document.getElementById('fluidCanvas');
+        const fCtx = fluidCanvas ? fluidCanvas.getContext('2d') : null;
+        let particles = [];
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let isMouseMoving = false;
+        let mouseTimer = null;
+
+        class FluidParticle {
+            constructor(x, y) {
+                this.x = x || Math.random() * window.innerWidth;
+                this.y = y || Math.random() * window.innerHeight;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.size = Math.random() * 2.5 + 1.2;
+                this.baseAlpha = Math.random() * 0.45 + 0.15;
+                this.color = Math.random() > 0.6 ? '#3b82f6' : (Math.random() > 0.5 ? '#10b981' : '#f97316');
+            }
+
+            update() {
+                // Jarak ke kursor mouse
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < 160) {
+                    // Gaya dorong fluid interaktif saat mouse mendekat
+                    const force = (160 - dist) / 160;
+                    const angle = Math.atan2(dy, dx);
+                    this.vx -= Math.cos(angle) * force * 1.2;
+                    this.vy -= Math.sin(angle) * force * 1.2;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Friction damping
+                this.vx *= 0.96;
+                this.vy *= 0.96;
+
+                // Batas layar bouncing
+                if (this.x < 0) this.x = window.innerWidth;
+                if (this.x > window.innerWidth) this.x = 0;
+                if (this.y < 0) this.y = window.innerHeight;
+                if (this.y > window.innerHeight) this.y = 0;
+            }
+
+            draw() {
+                if (!fCtx) return;
+                fCtx.fillStyle = this.color;
+                fCtx.globalAlpha = this.baseAlpha;
+                fCtx.beginPath();
+                fCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                fCtx.fill();
+            }
+        }
+
+        function initFluidSystem() {
+            if (!fluidCanvas || !fCtx) return;
+            fluidCanvas.width = window.innerWidth;
+            fluidCanvas.height = window.innerHeight;
+            particles = [];
+            const count = Math.min(85, Math.floor(window.innerWidth / 16));
+            for (let i = 0; i < count; i++) {
+                particles.push(new FluidParticle());
+            }
+        }
+
+        function animateFluid() {
+            if (document.body.getAttribute('data-wallpaper') === 'fluid' && fCtx) {
+                fCtx.clearRect(0, 0, fluidCanvas.width, fluidCanvas.height);
+
+                // Garis koneksi antar partikel (Fluid mesh)
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist < 90) {
+                            fCtx.strokeStyle = 'rgba(59, 130, 246, ' + (0.18 * (1 - dist / 90)) + ')';
+                            fCtx.lineWidth = 0.8;
+                            fCtx.beginPath();
+                            fCtx.moveTo(particles[i].x, particles[i].y);
+                            fCtx.lineTo(particles[j].x, particles[j].y);
+                            fCtx.stroke();
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(animateFluid);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            // Spawn splash particle ringan saat gerak cepat
+            if (document.body.getAttribute('data-wallpaper') === 'fluid' && Math.random() > 0.8 && particles.length < 110) {
+                const splash = new FluidParticle(mouseX + (Math.random() - 0.5) * 10, mouseY + (Math.random() - 0.5) * 10);
+                splash.vx = (Math.random() - 0.5) * 3;
+                splash.vy = (Math.random() - 0.5) * 3;
+                particles.push(splash);
+                if (particles.length > 100) particles.shift();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (fluidCanvas) {
+                fluidCanvas.width = window.innerWidth;
+                fluidCanvas.height = window.innerHeight;
+            }
+        });
+
+        initFluidSystem();
+        requestAnimationFrame(animateFluid);
+
     </script>
 </body>
 </html>
