@@ -1261,18 +1261,16 @@
 
         /* ===== ADAPTIVE MOBILE & TABLET OS (< 768px) ===== */
         @media (max-width: 768px) {
-            /* Fix iOS viewport scroll & body positioning */
             body, html {
-                height: 100dvh;
-                height: 100vh;
+                width: 100%;
+                height: 100%;
                 overflow: hidden;
-                position: fixed;
-                width: 100vw;
+                /* Note: Never use position: fixed on body in iOS Safari as it freezes input focus */
             }
 
             .desktop-container {
-                height: 100dvh;
-                height: 100vh;
+                width: 100%;
+                height: 100%;
                 position: relative;
                 overflow: hidden;
             }
@@ -1282,6 +1280,7 @@
                 height: 38px;
                 padding: 0 12px;
                 justify-content: space-between;
+                z-index: 9998;
             }
 
             .topbar-left {
@@ -1319,7 +1318,7 @@
             }
 
             .watermark-title {
-                font-size: 48px;
+                font-size: 46px;
             }
 
             .desktop-icon {
@@ -1336,67 +1335,70 @@
                 max-width: 70px;
             }
 
-            /* Window: Becomes Native Bottom Sheet on Mobile */
+            /* Window: Solid Native Bottom Sheet on Mobile */
             .window {
+                position: fixed !important;
                 left: 0 !important;
                 right: 0 !important;
                 top: auto !important;
                 bottom: 0 !important;
-                width: 100vw !important;
-                max-width: 100vw !important;
-                height: 86dvh !important;
-                height: 86vh !important;
-                max-height: calc(100dvh - 42px) !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 85dvh !important;
+                height: 85vh !important;
+                max-height: calc(100dvh - 38px) !important;
                 border-radius: 20px 20px 0 0 !important;
-                box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-active) !important;
-                transform: translateY(0);
-                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
-                z-index: 10000 !important;
+                box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-active) !important;
+                z-index: 99999 !important;
                 margin: 0 !important;
+                pointer-events: auto !important;
             }
 
+            /* CRITICAL: Must be display: none when hidden so it never intercepts touch events */
             .window.is-hidden {
-                display: flex !important;
-                transform: translateY(105%) !important;
-                pointer-events: none !important;
+                display: none !important;
             }
 
             /* Window Header Bar & Touch Controls */
             .window-bar {
                 cursor: default;
-                height: 44px;
-                padding: 0 12px;
+                height: 46px;
+                padding: 0 14px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 position: relative;
                 touch-action: manipulation;
+                background: var(--win-header);
+                border-bottom: 1px solid var(--border-color);
+                flex-shrink: 0;
             }
 
             .window-lights {
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 10px;
                 z-index: 12;
             }
 
-            /* Red Close Dot: Expanded touch hitbox for fingers */
+            /* Red Close Dot: Generous touch hitbox for fingers */
             .window-light-close {
-                width: 15px;
-                height: 15px;
+                width: 18px !important;
+                height: 18px !important;
                 position: relative;
                 cursor: pointer;
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: transparent;
+                border-radius: 50%;
             }
 
             .window-light-close::after {
                 content: "";
                 position: absolute;
-                top: -14px;
-                left: -14px;
-                right: -14px;
-                bottom: -14px;
+                top: -12px;
+                left: -12px;
+                right: -12px;
+                bottom: -12px;
                 background: transparent;
             }
 
@@ -1411,15 +1413,16 @@
                 position: absolute;
                 left: 50%;
                 transform: translateX(-50%);
-                font-size: 11px;
-                max-width: 58%;
+                font-size: 12px;
+                font-weight: 600;
+                max-width: 55%;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 pointer-events: none;
             }
 
-            /* Dedicated Prominent Mobile Close Button (✕) on the Right */
+            /* Prominent Mobile Close Button (✕) on the Right */
             .window-mobile-close {
                 display: inline-flex !important;
                 align-items: center;
@@ -1427,24 +1430,30 @@
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
-                background: rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.1);
                 border: 1px solid var(--border-color);
                 color: var(--text-main);
-                font-size: 15px;
+                font-size: 16px;
                 font-weight: 700;
                 cursor: pointer;
                 margin-left: auto;
-                z-index: 15;
+                z-index: 20;
                 flex-shrink: 0;
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: transparent;
-                transition: background 0.15s ease, transform 0.1s ease;
             }
 
             .window-mobile-close:active {
-                background: rgba(255, 95, 87, 0.3) !important;
-                color: #ff5f57 !important;
-                transform: scale(0.92);
+                background: rgba(255, 95, 87, 0.4) !important;
+                color: #fff !important;
+            }
+
+            /* Content Scrolling inside window sheet */
+            .window-content {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
             }
 
             /* Fixed Bottom Dock on Mobile with Safe Area */
@@ -1484,13 +1493,16 @@
             .admin-select {
                 font-size: 16px !important;
                 padding: 10px 12px !important;
-                touch-action: manipulation;
+                touch-action: auto !important;
+                -webkit-user-select: auto !important;
+                user-select: auto !important;
             }
 
             .btn-admin-primary {
                 padding: 12px 16px !important;
                 font-size: 14px !important;
                 touch-action: manipulation;
+                cursor: pointer;
             }
 
             .finder-grid {
@@ -3469,12 +3481,6 @@
 
         // Initialize on load
         
-        // iOS Safari auto-scroll reset when keyboard dismisses
-        document.addEventListener('focusout', (e) => {
-            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
-                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-            }
-        });
         window.addEventListener('DOMContentLoaded', () => {
             fetchAllData();
             checkAdminSession();
