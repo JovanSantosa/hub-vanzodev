@@ -1,0 +1,58 @@
+name: Deploy to VPS (portofolio.vanzodev.my.id)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST || secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER || secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY || secrets.SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 [CI/CD] Deploying portofolio.vanzodev.my.id..."
+
+            WEB_ROOT="/var/www/portofolio"
+            cd "$WEB_ROOT"
+
+            # Tarik kode terbaru dari GitHub
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
+
+            # Install dependencies produksi
+            COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction
+
+            # Bersihkan cache bootstrap agar tidak ada bentrok dev packages
+            echo '<?php return [];' > "$WEB_ROOT/bootstrap/cache/packages.php"
+            echo '<?php return [];' > "$WEB_ROOT/bootstrap/cache/services.php"
+            php artisan package:discover
+
+            # Migrasi database SQLite
+            php artisan migrate --force
+
+            # Optimasi cache framework
+            php artisan optimize:clear
+            php artisan optimize
+
+            # Pastikan permission file dan SQLite database benar
+            chown -R www-data:www-data "$WEB_ROOT"
+            chmod -R 775 "$WEB_ROOT/storage" "$WEB_ROOT/bootstrap/cache" "$WEB_ROOT/database"
+            if [ -f "$WEB_ROOT/database/database.sqlite" ]; then
+                chmod 664 "$WEB_ROOT/database/database.sqlite"
+            fi
+
+            # Reload PHP-FPM
+            systemctl reload php8.3-fpm
+
+            echo "✅ [CI/CD] Deployment Selesai & Sukses!"
