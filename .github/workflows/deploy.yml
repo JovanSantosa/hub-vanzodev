@@ -15,9 +15,9 @@ jobs:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST || secrets.SSH_HOST }}
-          username: ${{ secrets.VPS_USER || secrets.SSH_USER }}
-          key: ${{ secrets.VPS_SSH_KEY || secrets.SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
             echo "🚀 [CI/CD] Deploying portofolio.vanzodev.my.id..."
