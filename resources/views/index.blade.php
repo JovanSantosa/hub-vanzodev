@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title>VanzoDev — Minimalist Desktop OS & Portfolio</title>
     <meta name="description" content="Personal dynamic desktop OS portfolio of Jovan (VanzoDev). Full Stack & Systems Engineer.">
     <meta name="theme-color" content="#101114">
@@ -424,6 +424,10 @@
             box-shadow: 0 0 0 1px var(--border-active), 0 20px 48px -8px rgba(0,0,0,0.6), 0 40px 80px -15px rgba(0,0,0,0.7);
         }
 
+        
+        .window-mobile-close {
+            display: none;
+        }
         .window-bar {
             position: relative;
             display: flex;
@@ -1257,77 +1261,236 @@
 
         /* ===== ADAPTIVE MOBILE & TABLET OS (< 768px) ===== */
         @media (max-width: 768px) {
+            /* Fix iOS viewport scroll & body positioning */
+            body, html {
+                height: 100dvh;
+                height: 100vh;
+                overflow: hidden;
+                position: fixed;
+                width: 100vw;
+            }
+
+            .desktop-container {
+                height: 100dvh;
+                height: 100vh;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* Responsive Topbar on Mobile */
+            .topbar {
+                height: 38px;
+                padding: 0 12px;
+                justify-content: space-between;
+            }
+
+            .topbar-left {
+                flex: none;
+                gap: 8px;
+            }
+
+            /* Hide verbose desktop buttons in topbar */
+            .topbar-left .topbar-btn {
+                display: none !important;
+            }
+
+            .topbar-right .topbar-btn:not(:nth-child(2)) {
+                display: none !important;
+            }
+
+            .topbar-right {
+                flex: none;
+                gap: 6px;
+            }
+
+            .topbar-center {
+                position: static;
+                transform: none;
+                margin: 0 auto;
+            }
+
+            .topbar-clock {
+                font-size: 11px;
+            }
+
+            /* Watermark & Desktop Icons */
             .desktop-watermark {
-                top: 42%;
+                top: 40%;
             }
 
             .watermark-title {
-                font-size: 58px;
+                font-size: 48px;
             }
 
             .desktop-icon {
-                width: 72px;
+                width: 68px;
             }
 
             .desktop-icon-art {
-                width: 50px;
-                height: 46px;
+                width: 46px;
+                height: 42px;
             }
 
             .desktop-icon-label {
                 font-size: 10px;
-                max-width: 76px;
+                max-width: 70px;
             }
 
-            /* Responsive floating window becomes full-screen sheet */
+            /* Window: Becomes Native Bottom Sheet on Mobile */
             .window {
                 left: 0 !important;
-                top: 34px !important;
+                right: 0 !important;
+                top: auto !important;
+                bottom: 0 !important;
                 width: 100vw !important;
-                height: calc(100vh - 34px - 64px) !important;
-                border-radius: 16px 16px 0 0 !important;
-                box-shadow: 0 -8px 30px rgba(0,0,0,0.6) !important;
+                max-width: 100vw !important;
+                height: 86dvh !important;
+                height: 86vh !important;
+                max-height: calc(100dvh - 42px) !important;
+                border-radius: 20px 20px 0 0 !important;
+                box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-active) !important;
                 transform: translateY(0);
-                transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                z-index: 10000 !important;
+                margin: 0 !important;
             }
 
             .window.is-hidden {
                 display: flex !important;
-                transform: translateY(110%) !important;
+                transform: translateY(105%) !important;
+                pointer-events: none !important;
+            }
+
+            /* Window Header Bar & Touch Controls */
+            .window-bar {
+                cursor: default;
+                height: 44px;
+                padding: 0 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: relative;
+                touch-action: manipulation;
+            }
+
+            .window-lights {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                z-index: 12;
+            }
+
+            /* Red Close Dot: Expanded touch hitbox for fingers */
+            .window-light-close {
+                width: 15px;
+                height: 15px;
+                position: relative;
+                cursor: pointer;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .window-light-close::after {
+                content: "";
+                position: absolute;
+                top: -14px;
+                left: -14px;
+                right: -14px;
+                bottom: -14px;
+                background: transparent;
+            }
+
+            /* Hide desktop-only minimize & maximize on mobile sheets */
+            .window-light-min,
+            .window-light-max {
+                display: none !important;
+            }
+
+            /* Window Title on Mobile */
+            .window-title {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 11px;
+                max-width: 58%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
                 pointer-events: none;
             }
 
-            .mobile-drag-indicator {
-                display: block;
-                width: 38px;
-                height: 4px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 9999px;
-                margin: 6px auto;
+            /* Dedicated Prominent Mobile Close Button (✕) on the Right */
+            .window-mobile-close {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid var(--border-color);
+                color: var(--text-main);
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                margin-left: auto;
+                z-index: 15;
+                flex-shrink: 0;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+                transition: background 0.15s ease, transform 0.1s ease;
             }
 
-            .window-bar {
-                cursor: default;
-                height: 40px;
+            .window-mobile-close:active {
+                background: rgba(255, 95, 87, 0.3) !important;
+                color: #ff5f57 !important;
+                transform: scale(0.92);
             }
 
+            /* Fixed Bottom Dock on Mobile with Safe Area */
             .dock-wrapper {
-                bottom: 8px;
+                position: fixed !important;
+                bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+                left: 0 !important;
+                width: 100% !important;
+                z-index: 9990 !important;
+                pointer-events: none;
             }
 
             .dock {
+                pointer-events: auto;
                 padding: 6px 10px;
-                gap: 6px;
-                border-radius: 16px;
+                gap: 4px;
+                border-radius: 18px;
+                max-width: 95vw;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
             }
 
             .dock-btn {
-                padding: 5px;
+                padding: 6px 5px;
+                min-width: 32px;
+                min-height: 32px;
+                touch-action: manipulation;
             }
 
             .dock-btn svg {
                 width: 18px;
                 height: 18px;
+            }
+
+            /* Mobile Forms: font-size 16px to prevent iOS Safari auto-zoom! */
+            .admin-input,
+            .admin-textarea,
+            .admin-select {
+                font-size: 16px !important;
+                padding: 10px 12px !important;
+                touch-action: manipulation;
+            }
+
+            .btn-admin-primary {
+                padding: 12px 16px !important;
+                font-size: 14px !important;
+                touch-action: manipulation;
             }
 
             .finder-grid {
@@ -1645,6 +1808,8 @@
                 <div class="window-actions">
                     <button class="btn-mini-admin" id="btnAddProjectQuick" onclick="openAdminCreateProject()" style="display: none;">+ Add Project</button>
                 </div>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('projectsWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content">
                 <div class="finder-toolbar">
@@ -1680,6 +1845,8 @@
                     <button class="window-light window-light-max" onclick="maximizeWindow('terminalWin')"></button>
                 </div>
                 <span class="window-title">vanzo@hub:~ (bash)</span>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('terminalWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content">
                 <div class="terminal-container">
@@ -1743,6 +1910,10 @@
                     <button class="window-light window-light-max" onclick="maximizeWindow('todoWin')"></button>
                 </div>
                 <span class="window-title">todos.md — Roadmap</span>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('calendarWin')" aria-label="Close Window">✕</button>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('todoWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content">
                 <div class="roadmap-container">
@@ -1786,6 +1957,8 @@
                     <button class="window-light window-light-max" onclick="maximizeWindow('skillsWin')"></button>
                 </div>
                 <span class="window-title">Skills & Capabilities</span>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('skillsWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content" style="padding: 16px;" id="skillsContentContainer">
                 <!-- Dynamically loaded from /api/skills -->
@@ -1801,6 +1974,8 @@
                     <button class="window-light window-light-max" onclick="maximizeWindow('aboutWin')"></button>
                 </div>
                 <span class="window-title">about.txt</span>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('aboutWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content" style="padding: 20px; font-size: 13px; line-height: 1.7; color: var(--text-muted);" id="aboutContent">
                 <h3 style="color: var(--text-main); margin-bottom: 8px; font-size: 16px;" id="aboutHeadline">Engineering with intent.</h3>
@@ -1822,6 +1997,8 @@
                     <button class="window-light window-light-max" onclick="maximizeWindow('contactWin')"></button>
                 </div>
                 <span class="window-title">contact.eml</span>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('contactWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content" style="padding: 18px;">
                 <form id="contactForm" onsubmit="submitContactForm(event)" style="display: flex; flex-direction: column; gap: 10px;">
@@ -1853,6 +2030,8 @@
                     <button class="window-light window-light-max" onclick="maximizeWindow('adminWin')"></button>
                 </div>
                 <span class="window-title" style="color: #fff;">Vanzo OS Admin & CMS</span>
+            
+                <button class="window-mobile-close" onclick="toggleWindow('adminWin')" aria-label="Close Window">✕</button>
             </div>
             <div class="window-content">
                 <!-- Unauthenticated: Login View -->
@@ -3289,6 +3468,13 @@
         }
 
         // Initialize on load
+        
+        // iOS Safari auto-scroll reset when keyboard dismisses
+        document.addEventListener('focusout', (e) => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            }
+        });
         window.addEventListener('DOMContentLoaded', () => {
             fetchAllData();
             checkAdminSession();
