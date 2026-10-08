@@ -15,10 +15,10 @@ Route::get('/projects/{project}', [ProjectController::class, 'show']);
 Route::get('/tasks', [TaskController::class, 'index']);
 Route::get('/skills', [SkillController::class, 'index']);
 Route::get('/profile', [ProfileController::class, 'show']);
-Route::post('/contact', [ContactController::class, 'store']);
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:10,1');
 
 // Auth Endpoints
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
